@@ -320,7 +320,7 @@ function selecionarMes(mIndex) {
     let saldoMes = 0;
     lista.forEach(t => t.tipo === 'receita' ? saldoMes += t.valor : saldoMes -= t.valor);
     document.getElementById('conteudo-mes-info').innerHTML = 
-        `Balanço ${mesStr.split('-').reverse().slice(0,2).join('/')}: <span class="${saldoMes>=0?'text-green-600':'text-red-600'}">${formatarBRL(saldoMes)}</span>`;
+        `Historico ${mesStr.split('-').reverse().slice(0,2).join('/')}`;
 
     renderizarLista('conteudo-mes', lista);
 }
