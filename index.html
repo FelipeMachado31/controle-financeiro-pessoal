@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro</title>
+
+    <!-- Ícone para iPhone (Tela Inicial) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+
+    <!-- Favicon padrão (navegadores) -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icon.png">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="Style.css">
+</head>
+
+<body class="bg-gray-100 min-h-screen pb-10">
+    <div class="max-w-md mx-auto p-4 space-y-4">
+
+        <div class="flex justify-between items-center px-1">
+            <h1 class="text-lg font-bold text-gray-700">Minhas Finanças</h1>
+            <button onclick="toggleConfig()" class="text-2xl text-gray-400 hover:text-gray-600 transition" title="Configurações e Backup">⚙️</button>
+        </div>
+
+        <div id="config-box" class="hidden bg-white p-4 rounded-xl shadow-lg border border-gray-200 mb-4 animate-fade-in relative">
+            <h3 class="font-bold text-gray-600 mb-2 text-sm border-b pb-1">Gerenciamento de Dados</h3>
+            <p class="text-xs text-gray-500 mb-3">Salve seus dados ou carregue de outro dispositivo.</p>
+            <div class="flex space-x-2">
+                <button onclick="baixarBackup()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white p-2 rounded text-sm font-medium transition">⬇️ Baixar</button>
+                <button onclick="document.getElementById('file-input').click()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded text-sm font-medium transition">⬆️ Carregar</button>
+                <input type="file" id="file-input" class="hidden" accept=".json" onchange="carregarBackup(this)">
+            </div>
+            <button onclick="toggleConfig()" class="absolute top-2 right-3 text-gray-400 font-bold hover:text-red-500">×</button>
+        </div>
+
+        <div class="flex bg-white rounded-xl shadow overflow-hidden">
+            <button id="tab-geral" class="flex-1 p-2 bg-blue-600 text-white transition" onclick="trocarAba('geral')">Geral</button>
+            <button id="tab-parcelas" class="flex-1 p-2 transition" onclick="trocarAba('parcelas')">Recorrências</button>
+            <button id="tab-meses" class="flex-1 p-2 transition" onclick="trocarAba('meses')">Histórico</button>
+        </div>
+
+        <div id="aba-geral" class="space-y-4">
+            <div class="bg-blue-600 text-white p-4 rounded-xl shadow-lg transition transform hover:scale-[1.01]">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-sm opacity-80">Saldo Disponível (Hoje)</p>
+                        <p id="saldo-acumulado" class="text-3xl font-bold">R$ 0,00</p>
+                    </div>
+                    </div>
+            </div>
+
+            <div id="form-box" class="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500 transition-all">
+                <h2 class="font-semibold mb-3 text-gray-700">Novo Lançamento</h2>
+                <div class="flex space-x-2 mb-2">
+                    <select id="input-tipo" class="w-full border p-2 rounded bg-gray-50 font-medium cursor-pointer" onchange="mudarCorFormulario()">
+                        <option value="despesa">🔴 Despesa Pontual</option>
+                        <option value="receita">🟢 Receita / Salário</option>
+                        <option value="fixa">🔵 Fixa Mensal (Recorrente)</option>
+                    </select>
+                </div>
+                <input id="input-descricao" class="w-full border p-2 rounded mb-2 focus:ring-2 focus:ring-blue-200 outline-none" placeholder="Descrição">
+                <input id="input-valor" type="number" step="0.01" class="w-full border p-2 rounded mb-2 focus:ring-2 focus:ring-blue-200 outline-none" placeholder="Valor">
+                <div class="flex space-x-2 mb-3">
+                    <input id="input-data" type="date" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none">
+                    <input id="input-categoria" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none" placeholder="Categoria" list="cat-suggestions">
+                </div>
+                <datalist id="cat-suggestions"></datalist>
+                <button id="btn-salvar" onclick="salvarTransacao()" class="w-full bg-red-500 hover:bg-red-600 text-white p-3 rounded font-bold transition shadow-md active:transform active:scale-95">Adicionar</button>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow">
+                <h2 class="font-semibold text-gray-700 mb-2">Movimentações (Mês Atual)</h2>
+                <div id="lista-recentes"></div>
+            </div>
+        </div>
+
+        <div id="aba-parcelas" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow border-l-4 border-purple-500">
+                <h2 class="font-semibold mb-2 text-gray-700">Novo Parcelamento</h2>
+                <input id="p-descricao" class="w-full border p-2 rounded mb-2" placeholder="Descrição">
+                <div class="flex space-x-2 mb-2">
+                    <input id="p-valor" type="number" class="w-full border p-2 rounded" placeholder="Valor Parcela">
+                    <input id="p-qtd" type="number" class="w-full border p-2 rounded" placeholder="Qtd Parcelas">
+                </div>
+                <input id="p-data" type="date" class="w-full border p-2 rounded mb-3">
+                <button onclick="salvarParcelamento()" class="w-full bg-purple-500 hover:bg-purple-600 text-white p-2 rounded font-bold transition shadow-md">Gerar</button>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow">
+                <h2 class="font-semibold mb-2 text-gray-700">Despesas Fixas</h2>
+                <div id="lista-fixas"></div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow">
+                <h2 class="font-semibold mb-2 text-gray-700">Parcelamentos</h2>
+                <div id="lista-parcelamentos"></div>
+            </div>
+        </div>
+
+        <div id="aba-meses" class="hidden space-y-3">
+            <div class="flex justify-between items-center bg-white p-2 rounded shadow">
+                <button onclick="mudarAno(-1)" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 font-bold text-gray-600 transition">&lt;</button>
+                <span id="ano-display" class="font-bold text-xl text-blue-600">2025</span>
+                <button onclick="mudarAno(1)" class="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 font-bold text-gray-600 transition">&gt;</button>
+            </div>
+
+            <div id="grid-meses" class="grid grid-cols-6 gap-2 text-sm text-center"></div>
+            
+            <div id="conteudo-mes-info" class="text-center py-2 font-bold text-gray-600"></div>
+            <div id="conteudo-mes" class="bg-white p-4 rounded-xl shadow"></div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
